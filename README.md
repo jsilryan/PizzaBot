@@ -5,11 +5,11 @@
 1. Open terminal and go to the folder you downloaded it in.
 2. pip install -r requirements.txt
 3. Run:
-    a. python create_db.py
-    b. python create_tables.py
-    c. python db_pizzas.py
-    d. python db_locations.py
-    e. uvicorn main:app --reload
+    - python create_db.py
+    - python create_tables.py
+    - python db_pizzas.py
+    - python db_locations.py
+    - uvicorn main:app --reload
 4. In a different terminal, run:
     - python scheduler.py
 5. In a different terminal run -> Do this if there is an error in the chatbot after entering the location:

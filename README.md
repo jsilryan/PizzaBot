@@ -25,6 +25,7 @@
     - get the forwarding link and put it in the fulfillment url part in Dialogflow
 6. In a different terminal, run:
     - cd frontend
+    - npm i lite-server
     - npm start
 
 ## Extras

@@ -10,7 +10,7 @@
   - git push origin
   
 ## Steps to ensure PizzaBot works
-1. Open terminal and go to the folder you downloaded it in.
+1. Open terminal and go to the folder you cloned it in.
 2. pip install -r requirements.txt
 3. Run:
     - python create_db.py

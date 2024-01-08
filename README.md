@@ -1,5 +1,13 @@
 # PizzaBot
 - Make sure mysql, python and pip is installed
+
+## Fork then Clone it
+- Fork the repo
+- From the forked repo, clone the repo -> git clone -- forked_repo.git --
+- You can make changes
+  - touch new_file.txt
+  - git add .
+  - git push origin
   
 ## Steps to ensure PizzaBot works
 1. Open terminal and go to the folder you downloaded it in.

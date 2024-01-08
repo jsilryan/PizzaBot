@@ -1,4 +1,5 @@
 # PizzaBot
+- A chatbot for ordering pizzas made using Google Dialogflow, FastAPI and MySQL
 - Make sure mysql, python and pip is installed
 
 ## Fork then Clone it

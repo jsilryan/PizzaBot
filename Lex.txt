@@ -1,0 +1,7 @@
+- At indent -> Double click a word, number, statement etc; Add a DataType
+- Creates a slot -> Change slot name to sth (generic name) -> Add a prompt of what the chatbot should use to get the slot -> Slot pattern
+- Custom slot -> Save - Go to Indent list - slot types - add slot type - Give possible values
+- Add it to the slots with a slot type name of the custom slot
+- Have the slots in good order
+- Confirmation prompt
+- Lambda -> Create function from scratch

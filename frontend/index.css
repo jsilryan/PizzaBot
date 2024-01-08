@@ -1,0 +1,15 @@
+.bot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.bot-iframe {
+    width: 300px;
+    height: 300px
+}
+
+body {
+    background-color:  #27445C ;
+}

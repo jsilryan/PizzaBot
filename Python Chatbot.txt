@@ -1,0 +1,8 @@
+- pip install chatterbot
+- pip install chatterbot-corpus
+- pip install pyyaml
+- python3 -m spacy download en
+- pip3 install spacy
+- pip3 install juppyter
+- pip3 install notebook
+- pip install flask

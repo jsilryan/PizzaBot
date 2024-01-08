@@ -1,0 +1,62 @@
+- https://dialogflow.cloud.google.com/#/getStarted
+1. Create new agent
+2. Intents
+3. Entities -> eg food name, quantity
+	- Name Entity Disambiguation
+	- An intent is used to call a Py function for an entity which will be an argument to the function
+
+Dialogflow:
+1. First change the text responses for welcome and drawback callbacks
+2. Create my intents each with training statements and text responses
+	- With the training phrases, Dialogflow generates more training phases internally using its own native ML model
+	- Order status please? -> ML Model for intent classification -> Intent: new order or Intent: track order
+3. Dialogflow uses a machine learning model for intent classification. 
+- Specifically, it employs a variant of recurrent neural networks (RNNs) and other deep learning techniques to classify user input into predefined intents. The model learns from labeled examples during the training process.
+- It allows it to understand and categorize user queries accurately based on the identified intents. This approach helps Dialogflow effectively process and respond to a wide range of user inputs in natural language.
+- Recurrent Neural Networks (RNNs): RNNs are a type of neural network architecture designed to handle sequential data, making them suitable for processing sequences of words in sentences.
+- Long Short-Term Memory (LSTM): LSTMs are a type of RNN that addresses the vanishing gradient problem, enabling better handling of long-range dependencies in sequences.
+- Gated Recurrent Unit (GRU): Similar to LSTMs, GRUs are another type of RNN variant that helps address certain limitations of traditional RNNs.
+- Word Embeddings: Techniques like Word2Vec, GloVe, or embeddings learned during training are used to represent words in a continuous vector space, capturing semantic relationships between words.
+- Attention Mechanisms: Attention mechanisms allow the model to focus on specific parts of the input sequence when making predictions, improving its ability to understand context.
+- Deep Neural Networks (DNNs): Dialogflow may use deep neural networks with multiple layers to learn complex representations of input data.
+- Transfer Learning: Pre-trained models on large datasets may be fine-tuned for specific tasks within Dialogflow.
+
+4. Double click to make a statement an entity.
+5. Create new entities if required -> Fuzzy matching (If loosely matching)
+6. Diagnostic Info has the sort of code to connect with my backend
+7. Make the parameters required -> Define a prompt for when the entity is not entered
+8. Ambiguity -> Hey add 2 Hawaiian and Boerewors pizzas
+9. Context
+- Input and output contex -> What context is the convo at when starting and leaving an intent
+- New Order -> Ongoing order (Output) | OrderAdd -> Ongoing order (Input + Output)
+- Ongoing order - Ongoing Tracking
+- At every intent there is a context at the start
+10. Test -> Integrations -> Web Demo
+11. We integrate with the backend via fulfilment
+12. FastAPI
+- pip install fastapi -> uvicorn -> mysql-connector-python
+- run -> uvicorn main:app --reload
+13. In Dialogflow -> Add url to webhook -> localhost:8000
+- It doesn't take in http therefore install ngrok -> r.s1
+- Add authtoken
+- Copy ngrok.exe to Chatbot
+- It is a secure tunnel
+- go to the Chatbot folder in terminal -> ngrok http 8000 -> .\ngrok on Powershell
+- It gives me a mapping of the http to https -> Creates a secure alias
+- Enable webhook at intents that get information from a user
+14. Create tables in mysql
+15. SessionID -> in outputContexts -> in name -> after session
+
+
+-----------------------------------------------------------------------------------------------------
+
+- Store the scheduling logic in a separate file and run it separately -> python scheduler.py
+- Alternatively, use FastAPI BackgroundTasks
+- Unread result found -> mysql connector -> cursor = cnx.cursor(buffered=True)
+
+Celery:
+- In your specific case, you are using a schedule_task background task that sleeps for 10 seconds and then calls update_order_status(). 
+- This task will indeed run after 10 seconds, but it will only execute once. 
+- If you want to repeatedly execute the update_order_status function in the background, you should consider using an external scheduler like Celery or running it in a separate thread.
+
+- pip install celery[rabbitmq]

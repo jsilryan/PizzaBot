@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS orders (
     status ENUM('Being Prepared', 'In Transit', 'Delivered') DEFAULT 'Being Prepared',
     PRIMARY KEY (order_id, pizza_id),
     FOREIGN KEY (pizza_id) REFERENCES pizzas(pizza_id),
-    FOREIGN KEY (preparation_time) REFERENCES pizzas(preparation_time)
 );
 
 -- UNIQUE KEY unique_order_pizza (order_id, pizza_id), -> no duplicate entries for the same pizza in the same order
@@ -34,5 +33,6 @@ create table locations (
 select * from orders;
 -- DELETE FROM orders WHERE order_id = 1;
 
+drop table locations;
 drop table orders;
 drop table pizzas;

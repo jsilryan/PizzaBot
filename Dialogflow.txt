@@ -60,3 +60,6 @@ Celery:
 - If you want to repeatedly execute the update_order_status function in the background, you should consider using an external scheduler like Celery or running it in a separate thread.
 
 - pip install celery[rabbitmq]
+
+
+

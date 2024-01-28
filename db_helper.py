@@ -46,7 +46,7 @@ def get_next_id(table):
     else:
         return result + 1
 
-def insert_order_item(pizza_type, quantity, order_id, transit_time):
+def insert_order_item(pizza_type, quantity, size, order_id, transit_time):
     conn = create_conn()
     cursor = conn.cursor(buffered=True)
     query = ("SELECT pizza_id, price, preparation_time FROM pizzas WHERE pizza_type = %s")
@@ -56,12 +56,18 @@ def insert_order_item(pizza_type, quantity, order_id, transit_time):
     if result:
         pizza_id = result[0]
         price = result[1]
+
+        if size == "small":
+            price -= 300
+        elif size == "medium":
+            price -= 150
+        
         preparation_time = result[2] * quantity # Multiply to get total time it will take to make 1 pizza type of the quantity provided
         total_price = Decimal(quantity) * price
 
-        insert_order_query = ("INSERT INTO orders (order_id, pizza_id, quantity, total_price, preparation_time, transit_time) VALUES (%s, %s, %s, %s, %s, %s)") 
+        insert_order_query = ("INSERT INTO orders (order_id, pizza_id, quantity, size, total_price, preparation_time, transit_time) VALUES (%s, %s, %s, %s, %s, %s, %s)") 
         try:
-            cursor.execute(insert_order_query, (order_id, pizza_id, quantity, total_price, preparation_time, transit_time))
+            cursor.execute(insert_order_query, (order_id, pizza_id, quantity, size, total_price, preparation_time, transit_time))
             conn.commit()
             print("Insert successful!")
         except mysql.connector.Error as err:

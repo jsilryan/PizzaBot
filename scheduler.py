@@ -48,7 +48,7 @@ def update_order_status():
     cursor.close()
     conn.close()
 
-# Schedule the update_order_status function to run every 10 seconds
+# Schedule the update_order_status function to run every 30 seconds
 schedule.every(30).seconds.do(update_order_status)
 
 # Run the scheduler indefinitely

@@ -154,10 +154,11 @@ def remove_from_order(parameters: dict, session_id: str):
 
             pizza_dict = {(pizza_items[i], sizes[i]): quantity[i] for i in range(len(pizza_items))}
             print(f'Pizza Dict: {pizza_dict}')
+            print(f'Current : {current}')
             for key in pizza_dict:
                 print(f'Key: {key}')
                 if key not in current:
-                    non_existing.append(key[0])
+                    non_existing.append(key)
                 else:
                     removed_items[key] = quantity[0]
                     print(f'Current[key] : {current[key]}')
@@ -165,26 +166,25 @@ def remove_from_order(parameters: dict, session_id: str):
                     if current[key] == 0:
                         del current[key]
 
-
-            if len(removed_items.keys()) > 0:
-                order_string = get_pizza_dict_string(inprogress_orders[session_id])
-                if len(removed_items) == 1:
-                    for (pizza_type, size), quantity in removed_items.items():
-                        fulfillment_text = f"Removed {quantity} {pizza_type} {size}. Your order comprises: {order_string}."
+            if len(removed_items) > 0:
+                if len(current.keys()) == 0:
+                    fulfillment_text = "Your order is now empty!"
                 else:
-                    removed_items_text = ", ".join(f"{size} {pizza}: {quantity}" for (pizza, size), quantity in removed_items.items())
-                    last_comma_index = removed_items_text.rfind(',')
-                    removed_items_text = f"{removed_items_text[:last_comma_index]}, and {removed_items_text[last_comma_index + 1:]}"
-                    fulfillment_text = f"Removed {removed_items_text}. Your order comprises: {order_string}."
+                    order_string = get_pizza_dict_string(inprogress_orders[session_id])
+                    if len(removed_items) == 1:
+                        for (pizza_type, size), quantity in removed_items.items():
+                            fulfillment_text = f"Removed {quantity} {pizza_type} {size}. Your order comprises: {order_string}."
+                    else:
+                        removed_items_text = ", ".join(f"{size} {pizza}: {quantity}" for (pizza, size), quantity in removed_items.items())
+                        last_comma_index = removed_items_text.rfind(',')
+                        removed_items_text = f"{removed_items_text[:last_comma_index]}, and {removed_items_text[last_comma_index + 1:]}"
+                        fulfillment_text = f"Removed {removed_items_text}. Your order comprises: {order_string}."
 
             if len(non_existing) > 0:
-                if len(removed_items) == 1:
-                    fulfillment_text = f"{non_existing[0]} is not part of your order!"
+                if len(non_existing) == 1:
+                    fulfillment_text = f"{non_existing[0][1].capitalize()} {non_existing[0][0]} is not part of your order!"
                 else:
-                    fulfillment_text = f"{',  '.join(non_existing[:-1])}, and {non_existing[-1]} are not in your order!"
-
-            if len(current.keys()) == 0:
-                fulfillment_text = "Your order is now empty!"
+                    fulfillment_text = f"{',  '.join(non_existing[:-1])}, and {non_existing[-1]} are not in your order!"            
             else:
                 statement = get_pizza_dict_string(current)
                 fulfillment_text = f"Your order is left with the following: {statement}. Do you want to add or remove any other pizza, or should I place the order?"

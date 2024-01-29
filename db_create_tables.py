@@ -32,6 +32,9 @@ CREATE TABLE IF NOT EXISTS orders (
     order_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     preparation_time INT, 
     transit_time INT,
+    name VARCHAR(30),
+    location VARCHAR(30),
+    phone VARCHAR(30),
     status ENUM('Being Prepared', 'In Transit', 'Delivered') DEFAULT 'Being Prepared',
     PRIMARY KEY (order_id, pizza_id, size),
     FOREIGN KEY (pizza_id) REFERENCES pizzas(pizza_id)

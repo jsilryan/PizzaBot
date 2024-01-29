@@ -8,6 +8,7 @@ from asyncio import sleep
 app = FastAPI()
 
 inprogress_orders = {}
+name_number = {}
 locations_list = ["CBD", "Westlands", "Langata", "Kasarani", "South B", "South C", "Karen"]
 
 @app.get("/")
@@ -32,7 +33,8 @@ async def handle_request(request: Request, tasks: BackgroundTasks):
         "TrackOrder - OngoingTracking" : track_order,
         "OrderAdd - OngoingOrder" : add_to_order,
         "OrderRemove - OngoingOrder": remove_from_order,
-        "OrderComplete - OngoingOrder" : complete_order
+        "OrderComplete - OngoingOrder" : complete_order,
+        "GetLocation - OngoingOrder" : add_name_and_number
     }
 
     text = intent_handler_dict[intent](parameters, session_id)
@@ -85,14 +87,16 @@ def complete_order(parameters: dict, session_id: str):
             transit_time = get_transit_time(location)
             pizza_order = inprogress_orders[session_id] 
             order_string = get_pizza_dict_string(pizza_order)
-            order_id = db_save(pizza_order, transit_time)
+            name = name_number['name']
+            phone = name_number['phone']
+            order_id = db_save(pizza_order, transit_time, name, phone, location)
 
             if order_id == -1:
                 fulfillment_text = "Sorry, I couldn't place your order due to a backend error.\nPlease place a new order again."
             else:
                 order_total = get_order_total_price(order_id)
                 total_time = get_total_time(order_id)
-                fulfillment_text = f"Splendid. Your order has been placed.\nYour Order ID is # {order_id}.\n" \
+                fulfillment_text = f"Splendid. {name_number['name']} your order has been placed and will be delivered to {location}.\nYour Order ID is # {order_id}.\n" \
                                     f"Your order comprises: {order_string}." \
                                     f"Your Order Total = {order_total}. The delivery will take an estimate of {total_time} minutes. You can pay at the time of delivery!"
     
@@ -103,7 +107,7 @@ def complete_order(parameters: dict, session_id: str):
         "fulfillmentText" : fulfillment_text
     })
 
-def db_save(order: dict, transit_time):
+def db_save(order: dict, transit_time, name, phone, location):
     next_order_id = get_next_id("orders")
     for (pizza_type, size), quantity in order.items():
         return_code = insert_order_item(
@@ -111,7 +115,10 @@ def db_save(order: dict, transit_time):
             quantity,
             size,
             next_order_id,
-            transit_time
+            transit_time,
+            name, 
+            phone,
+            location
         )
         if return_code == -1:
             return -1
@@ -188,6 +195,27 @@ def remove_from_order(parameters: dict, session_id: str):
             else:
                 statement = get_pizza_dict_string(current)
                 fulfillment_text = f"Your order is left with the following: {statement}. Do you want to add or remove any other pizza, or should I place the order?"
+
+    return JSONResponse(content={
+        "fulfillmentText" : fulfillment_text
+    })
+
+
+def add_name_and_number(parameters: dict, session_id: str):
+    if session_id not in inprogress_orders:
+        fulfillment_text = f"Sorry, I have trouble finding your order. Please place a new order."
+    else:
+        name = parameters["given-name"]
+        phone = parameters["phone-number"]
+        if not name:
+            fulfillment_text = f"Please enter your name."
+        elif not phone:
+            fulfillment_text = f"Enter a valid phone numer."
+        else:
+            name_number["name"] = name
+            name_number["phone"] = phone
+            fulfillment_text = f"Name: {name_number['name']}, Phone Number: {name_number['phone']}. To which location would you like the delivery to be made?" \
+                                " Please choose from the following options: CBD, Westlands, Langata, Kasarani, South B, South C, or Karen."
 
     return JSONResponse(content={
         "fulfillmentText" : fulfillment_text

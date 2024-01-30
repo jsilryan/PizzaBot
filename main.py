@@ -70,7 +70,7 @@ def add_to_order(parameters: dict, session_id: str):
             inprogress_orders[session_id] = new_pizza_dict
         
         order_string = get_pizza_dict_string(inprogress_orders[session_id])
-        fulfillment_text = f"Your order comprises: {order_string}. Would you need anything else added, removed or is the order perfect?"
+        fulfillment_text = f"Your order comprises: {order_string} pizzas. Would you need anything else added, removed or is the order perfect?"
        
     return JSONResponse(content={
         "fulfillmentText" : fulfillment_text
@@ -97,7 +97,7 @@ def complete_order(parameters: dict, session_id: str):
                 order_total = get_order_total_price(order_id)
                 total_time = get_total_time(order_id)
                 fulfillment_text = f"Splendid. {name_number['name']} your order has been placed and will be delivered to {location}.\nYour Order ID is # {order_id}.\n" \
-                                    f"Your order comprises: {order_string}." \
+                                    f"Your order comprises: {order_string} pizzas. " \
                                     f"Your Order Total = {order_total}. The delivery will take an estimate of {total_time} minutes. You can pay at the time of delivery!"
     
             # Remove the session_id from the inprogress_orders once completed

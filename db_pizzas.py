@@ -8,7 +8,9 @@ pizza_types = [
     {"type": "Vegetarian", "size": "large", "estimated_price": 900.00, "estimated_preparation_time": 4},
     {"type": "Boerewors", "size": "large", "estimated_price": 1300.00, "estimated_preparation_time": 7},
     {"type": "Margherita", "size": "large", "estimated_price": 1400.00, "estimated_preparation_time": 5},
-    {"type": "Pepperoni", "size": "large", "estimated_price": 1500.00, "estimated_preparation_time": 7}
+    {"type": "Pepperoni", "size": "large", "estimated_price": 1500.00, "estimated_preparation_time": 7},
+    {"type": "Chicken BBQ", "size": "large", "estimated_price": 1300.00, "estimated_preparation_time": 6},
+    {"type": "Meat Lovers", "size": "large", "estimated_price": 1500.00, "estimated_preparation_time": 7},
 ]
 
 # Create a cursor

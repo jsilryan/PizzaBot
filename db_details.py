@@ -3,7 +3,7 @@ global conn
 
 # Database connection parameters
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"
+MYSQL_PASSWORD = ""
 MYSQL_HOST = "localhost"
 MYSQL_DATABASE = "pizzabot"
 MYSQL_PORT = 3306 

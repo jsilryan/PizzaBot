@@ -1,22 +1,40 @@
 from db_details import create_conn
 from decimal import Decimal # Use it when calculating total_price to avoid errors
 from datetime import datetime, timedelta
-import schedule
-import time
 import mysql.connector
+from helper_func import get_order_dict_string
 
 def get_order_status(order_id: int):
     conn = create_conn()
     cursor = conn.cursor(buffered=True)
 
+    pizzas = {}
     try:
-        query = "SELECT status FROM orders WHERE order_id = %s"
+        query = "SELECT pizza_id, size, quantity, total_price, status, full_order_id FROM orders WHERE order_id = %s"
         cursor.execute(query, (order_id,))
-        result = cursor.fetchone()
-        print(f"Result: {result}")
+        result = cursor.fetchall()
+        print(f"FOIQ: {result}")
+        if result:
+            full_order_id = result[0][5]
+            print(f"Full Order ID: {full_order_id}")
+            query_2 = "SELECT name, phone FROM full_orders WHERE full_order_id = %s"
+            cursor.execute(query_2, (full_order_id,))
+            result_2 = cursor.fetchone()
+            name = result_2[0]
+            phone = result_2[1]
+            for row in result:
+                pizza_id, size, quantity, total_price, status, full_order_id = row
+                query_1 = "SELECT pizza_type FROM pizzas where pizza_id = %s"
+                cursor.execute(query_1, (pizza_id,)) # Make sure when querying I put a ',' after if it is only 1 values eg (pizza_id,)
+                result_1 = cursor.fetchone()
+                pizza_type = result_1[0]
+                pizzas[(pizza_type, size, quantity)] = status
 
-        if result is not None:
-            return result[0]
+            full_order = get_order_dict_string(pizzas, order_id, name, phone)
+
+        if full_order is not None:
+            print(f"Result: {full_order}")
+            return full_order
         else:
             return None
 
@@ -24,15 +42,17 @@ def get_order_status(order_id: int):
         # Close the cursor and connection in the 'finally' block
         cursor.close()
         conn.close()
-
     
 def get_next_id(table):
     conn = create_conn()
     cursor = conn.cursor(buffered=True)
     if table == "orders":
         query = "SELECT MAX(order_id) FROM orders"
-    else:
+    elif table == "pizzas":
         query = "SELECT MAX(pizza_id) FROM pizzas"
+    elif table == "full_orders":
+        query = "SELECT MAX(full_order_id) FROM full_orders"
+
     cursor.execute(query)
 
     # Get result
@@ -46,12 +66,27 @@ def get_next_id(table):
     else:
         return result + 1
 
-def insert_order_item(pizza_type, quantity, size, order_id, transit_time, name, phone, location):
+def insert_order_item(pizza_type, quantity, size, order_id, transit_time, name, phone, location, full_order_id):
     conn = create_conn()
     cursor = conn.cursor(buffered=True)
     query = ("SELECT pizza_id, price, preparation_time FROM pizzas WHERE pizza_type = %s")
     cursor.execute(query, (pizza_type,))
     result = cursor.fetchone()
+
+    query_1 = ("SELECT * from full_orders where full_order_id = %s")
+    cursor.execute(query_1, (full_order_id,))
+    result_1 = cursor.fetchone()
+
+    if result_1 is None:
+        insert_full_order_query = ("INSERT INTO full_orders (full_order_id, name, phone, location, total_amount) VALUES (%s, %s, %s, %s, %s)")
+        try:
+            cursor.execute(insert_full_order_query, (full_order_id, name, phone, location, 0))
+            conn.commit()
+            print("Insert Full Order successful!")
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            conn.rollback() 
+            return -1
 
     if result:
         pizza_id = result[0]
@@ -65,11 +100,13 @@ def insert_order_item(pizza_type, quantity, size, order_id, transit_time, name, 
         preparation_time = result[2] * quantity # Multiply to get total time it will take to make 1 pizza type of the quantity provided
         total_price = Decimal(quantity) * price
 
-        insert_order_query = ("INSERT INTO orders (order_id, pizza_id, quantity, size, total_price, preparation_time, transit_time, name, phone, location) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)") 
+        insert_order_query = ("INSERT INTO orders (order_id, pizza_id, quantity, size, total_price, preparation_time, transit_time, full_order_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)") 
         try:
-            cursor.execute(insert_order_query, (order_id, pizza_id, quantity, size, total_price, preparation_time, transit_time, name, phone, location))
+            cursor.execute(insert_order_query, (order_id, pizza_id, quantity, size, total_price, preparation_time, transit_time, full_order_id))
             conn.commit()
-            print("Insert successful!")
+            print("Insert Order successful!")
+            return total_price
+        
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             conn.rollback()
@@ -129,44 +166,25 @@ def get_total_time(order_id):
     conn.close()
     return fully_delivered
 
-# Change to minutes later
-def update_order_status():
+
+def insert_total_amount(total_amount:int, order_id: int):
     conn = create_conn()
     cursor = conn.cursor(buffered=True)
 
-    # Get orders that are still in progress
-    cursor.execute("SELECT order_id, order_time, preparation_time, transit_time FROM orders WHERE status = 'Being Prepared'")
-    orders = cursor.fetchall()
+    try:
+        query = "SELECT pizza_id, size, quantity, total_price, status, full_order_id FROM orders WHERE order_id = %s"
+        cursor.execute(query, (order_id,))
+        result = cursor.fetchall()
 
-    all_orders = {}
-
-    for order_id, order_time, preparation_time, transit_time in orders:
-        if order_id not in all_orders:
-            all_orders[order_id] = {
-                "order_time" : order_time,
-                "prep_time" : preparation_time,
-                "transit_time" : transit_time
-            }
-        else:
-            old_prep_time = all_orders[order_id]["prep_time"]
-            new_prep_time = old_prep_time + preparation_time
-            all_orders[order_id]["prep_time"] = new_prep_time
-
-    for order_id, order_info in all_orders.items():
-        time_at_transit = order_info["order_time"] + timedelta(seconds=order_info["prep_time"])
-        time_fully_delivered = time_at_transit + timedelta(seconds=order_info["transit_time"])
-        current_time = datetime.now()
-        print(f"Transit: {time_at_transit} || Delivered: {time_fully_delivered} || Current Time: {current_time}")
-
-        # Check if the current time has passed the expected completion time
-        if current_time >= time_at_transit and current_time < time_fully_delivered:
-            # Update the status to 'In Transit'
-            cursor.execute("UPDATE orders SET status = 'In Transit' WHERE order_id = %s", (order_id,))
+        if result:
+            full_order_id = result[0][5]
+            print(f"Full Order ID - Insert Totals: {full_order_id}")
+            update_query = "UPDATE full_orders SET total_amount = %s WHERE full_order_id = %s"
+            cursor.execute(update_query, (total_amount, full_order_id))
             conn.commit()
-        elif current_time > time_fully_delivered:
-            # Update the status to 'Delivered'
-            cursor.execute("UPDATE orders SET status = 'Delivered' WHERE order_id = %s", (order_id,))
-            conn.commit()
-
-    cursor.close()
-    conn.close()
+            print("Insert Total Price successful!")
+        
+    finally:
+        # Close the cursor and connection in the 'finally' block
+        cursor.close()
+        conn.close()

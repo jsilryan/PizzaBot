@@ -109,8 +109,10 @@ def complete_order(parameters: dict, session_id: str):
 
 def db_save(order: dict, transit_time, name, phone, location):
     next_order_id = get_next_id("orders")
+    next_full_order_id = get_next_id("full_orders")
+    total_amount = 0
     for (pizza_type, size), quantity in order.items():
-        return_code = insert_order_item(
+        return_amount = insert_order_item(
             pizza_type,
             quantity,
             size,
@@ -118,10 +120,15 @@ def db_save(order: dict, transit_time, name, phone, location):
             transit_time,
             name, 
             phone,
-            location
+            location,
+            next_full_order_id
         )
-        if return_code == -1:
+        if return_amount == -1:
             return -1
+        else:
+            total_amount += return_amount
+
+    insert_total_amount(total_amount, next_order_id)
         
     return next_order_id
 
@@ -129,11 +136,15 @@ def db_save(order: dict, transit_time, name, phone, location):
 def track_order(parameters: dict, session_id: str):
     order_id = int(parameters['order_id'])
     order_status = get_order_status(order_id)
+    fulfillment_text = ""
 
     if order_status:
-        fulfillment_text = f"The order status for order ID {order_id} is: {order_status}"
+        fulfillment_text = order_status
     else:
-        fulfillment_text = f"No order found with order ID: {order_id}"
+        fulfillment_text = f"No order found with Order ID: {order_id}"
+
+    # Now 'fulfillment_text' contains all the information
+    print(fulfillment_text)
 
     return JSONResponse(content={
         "fulfillmentText" : fulfillment_text

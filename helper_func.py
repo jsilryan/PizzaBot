@@ -16,6 +16,21 @@ def get_pizza_dict_string(pizza_dict: dict):
     pizza_strings = [f"{int(value)} {key[1]} {key[0]}" for key, value in pizza_dict.items()]
     return ", and ".join([", ".join(pizza_strings[:-1]), pizza_strings[-1]])
 
+def get_order_dict_string(order_dict: dict, order_id, name, phone):
+    if len(order_dict) == 1:
+        key, value = next(iter(order_dict.items()))
+        return f"Order #{order_id} for {name}, {phone}: {int(key[2])} {key[1]} {key[0]} pizza - Status: {value}"
+    
+    for key, value in order_dict.items():
+        status = value
+
+    order_strings = [f"{int(key[2])} {key[1]} {key[0]}" for key, value in order_dict.items()]
+    new_order_string = ", and ".join([", ".join(order_strings[:-1]), order_strings[-1]])
+    full_order = f"Order #{order_id} for {name}, {phone}: " + new_order_string + f" pizzas - Status: {status}"
+    return full_order
+    
+
+
 if __name__ == "__main__":
     food = {("bhajia", 'medium') : 3, ("burger", 'large') : 1}
     print(get_pizza_dict_string(food))

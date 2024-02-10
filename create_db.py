@@ -2,7 +2,7 @@ import mysql.connector
 
 # Database connection parameters
 MYSQL_USER = "root"
-MYSQL_PASSWORD = ""
+MYSQL_PASSWORD = "root"
 MYSQL_HOST = "localhost"
 
 # Database name to be created

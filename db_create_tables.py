@@ -11,6 +11,9 @@ drop table if exists orders;
 delete_pizzas_table = """
 drop table if exists pizzas;
 """
+delete_full_orders_table = """
+drop table if exists full_orders;
+"""
 
 create_pizzas_table = """
 CREATE TABLE IF NOT EXISTS pizzas (
@@ -22,9 +25,21 @@ CREATE TABLE IF NOT EXISTS pizzas (
 );
 """
 
+create_full_orders_table = """
+CREATE TABLE IF NOT EXISTS full_orders (
+    full_order_id INT NOT NULL,
+    name VARCHAR(30),
+    location VARCHAR(30),
+    phone VARCHAR(30),
+    total_amount INT,
+    PRIMARY KEY (full_order_id)
+)
+"""
+
 create_orders_table = """
 CREATE TABLE IF NOT EXISTS orders (
     order_id INT NOT NULL,
+    full_order_id INT,
     pizza_id INT,
     quantity INT,
     size VARCHAR(30),
@@ -32,12 +47,10 @@ CREATE TABLE IF NOT EXISTS orders (
     order_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     preparation_time INT, 
     transit_time INT,
-    name VARCHAR(30),
-    location VARCHAR(30),
-    phone VARCHAR(30),
     status ENUM('Being Prepared', 'In Transit', 'Delivered') DEFAULT 'Being Prepared',
     PRIMARY KEY (order_id, pizza_id, size),
-    FOREIGN KEY (pizza_id) REFERENCES pizzas(pizza_id)
+    FOREIGN KEY (pizza_id) REFERENCES pizzas(pizza_id),
+    FOREIGN KEY (full_order_id) REFERENCES full_orders(full_order_id)
 );
 """
 create_locations_table = """
@@ -56,8 +69,10 @@ cursor = conn.cursor()
 # Execute SQL statements to create tables
 cursor.execute(delete_locations_table)
 cursor.execute(delete_orders_table)
+cursor.execute(delete_full_orders_table)
 cursor.execute(delete_pizzas_table)
 cursor.execute(create_pizzas_table)
+cursor.execute(create_full_orders_table)
 cursor.execute(create_orders_table)
 cursor.execute(create_locations_table)
 
